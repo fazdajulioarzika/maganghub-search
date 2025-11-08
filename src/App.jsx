@@ -57,7 +57,7 @@ const App = () => {
 
   const handleChange = (e) => {
     const { name, value } = e.target;
-    setFilters({ ...filters, [name]: value });
+    setFilters({ ...filters, [name]: value, page: 1 });
 
     if (name === "kode_provinsi") {
       setFilters((prev) => ({ ...prev, kode_kabupaten: "" }));
@@ -366,8 +366,17 @@ const App = () => {
               </div>
             ))}
           </div>
-          {/* Pagination */}
           <div className="flex justify-center items-center gap-2 mt-8 flex-wrap">
+            {/* ⏮️ Tombol ke halaman pertama */}
+            <button
+              onClick={() => handlePageChange(1)}
+              disabled={filters.page === 1 || loading}
+              className="px-3 py-1 bg-gray-200 hover:bg-gray-300 rounded disabled:opacity-50"
+            >
+              «
+            </button>
+
+            {/* ⬅️ Tombol halaman sebelumnya */}
             <button
               onClick={() => handlePageChange(filters.page - 1)}
               disabled={filters.page === 1 || loading}
@@ -386,7 +395,7 @@ const App = () => {
                 <button
                   key={pageNum}
                   onClick={() => handlePageChange(pageNum)}
-                  className={`px-3 py-1 rounded ${
+                  className={`px-2 py-1 rounded ${
                     filters.page === pageNum
                       ? "bg-blue-600 text-white"
                       : "bg-gray-200 hover:bg-gray-300"
@@ -396,12 +405,22 @@ const App = () => {
                 </button>
               ))}
 
+            {/* ➡️ Tombol halaman berikutnya */}
             <button
               onClick={() => handlePageChange(filters.page + 1)}
               disabled={filters.page === totalPages || loading}
               className="px-3 py-1 bg-gray-200 hover:bg-gray-300 rounded disabled:opacity-50"
             >
               &gt;
+            </button>
+
+            {/* ⏭️ Tombol ke halaman terakhir */}
+            <button
+              onClick={() => handlePageChange(totalPages)}
+              disabled={filters.page === totalPages || loading}
+              className="px-3 py-1 bg-gray-200 hover:bg-gray-300 rounded disabled:opacity-50"
+            >
+              »
             </button>
           </div>
 
@@ -410,6 +429,7 @@ const App = () => {
             Halaman {filters.page} dari {totalPages} &nbsp;•&nbsp; Total{" "}
             {totalData} data
           </p>
+
           <BackToTopButton />
         </>
       ) : (

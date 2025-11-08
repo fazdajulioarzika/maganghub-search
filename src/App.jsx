@@ -36,7 +36,7 @@ const App = () => {
         return;
       }
       try {
-        const res = await fetch(`/api/regencies?code=${selectedProvince}`);
+        const res = await fetch(`/api/regencies?code=${filters.kode_provinsi}`);
         const data = await res.json();
         setKabupatenList(data.data || []);
       } catch (error) {

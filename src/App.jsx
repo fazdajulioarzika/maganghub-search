@@ -18,7 +18,7 @@ const App = () => {
   useEffect(() => {
     const fetchProvinces = async () => {
       try {
-        const res = await fetch("/wilayah/provinces.json");
+        const res = await fetch("/api/provinces");
         const data = await res.json();
         setProvinsiList(data.data || []);
       } catch (error) {
@@ -36,9 +36,7 @@ const App = () => {
         return;
       }
       try {
-        const res = await fetch(
-          `/wilayah/regencies/${filters.kode_provinsi}.json`
-        );
+        const res = await fetch(`/api/regencies?code=${selectedProvince}`);
         const data = await res.json();
         setKabupatenList(data.data || []);
       } catch (error) {

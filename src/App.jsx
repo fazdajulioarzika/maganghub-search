@@ -1,23 +1,29 @@
-import React, { useState, useEffect } from "react";
+import { useState, useEffect } from "react";
+import BackToTopButton from "./components/BackToTopButton";
 
 const App = () => {
   const [filters, setFilters] = useState({
     keyword: "",
     order_by: "jumlah_terdaftar",
     order_direction: "ASC",
-    limit: 10,
+    limit: 60,
     kode_provinsi: "",
     kode_kabupaten: "",
+    programstudi: "",
+    page: 1,
   });
   const [provinsiList, setProvinsiList] = useState([]);
   const [kabupatenList, setKabupatenList] = useState([]);
   const [results, setResults] = useState([]);
   const [loading, setLoading] = useState(false);
+  const [totalPages, setTotalPages] = useState(1);
+  const [totalData, setTotalData] = useState(0);
 
   // 🔹 Ambil daftar provinsi dari API wilayah.id
   useEffect(() => {
     const fetchProvinces = async () => {
       try {
+        // const res = await fetch("/wilayah/provinces.json");
         const res = await fetch("/api/provinces");
         const data = await res.json();
         setProvinsiList(data.data || []);
@@ -36,6 +42,9 @@ const App = () => {
         return;
       }
       try {
+        // const res = await fetch(
+        //   `/wilayah/regencies/${filters.kode_provinsi}.json`
+        // );
         const res = await fetch(`/api/regencies?code=${filters.kode_provinsi}`);
         const data = await res.json();
         setKabupatenList(data.data || []);
@@ -63,8 +72,8 @@ const App = () => {
     const params = new URLSearchParams({
       order_by: filters.order_by,
       order_direction: filters.order_direction,
-      page: 1,
-      limit: filters.limit,
+      page: filters.page,
+      limit: filters.limit || 60,
     });
 
     if (filters.keyword) params.append("keyword", filters.keyword);
@@ -74,14 +83,34 @@ const App = () => {
       params.append(
         "kode_kabupaten",
         filters.kode_kabupaten.replace(/\./g, "")
-      ); // 🔥 hapus titik
+      );
 
     try {
       const response = await fetch(
         `https://maganghub.kemnaker.go.id/be/v1/api/list/vacancies-aktif?${params}`
       );
       const json = await response.json();
-      const data = json.data || [];
+      let data = json.data || [];
+
+      // Ambil pagination info dari meta
+      const pagination = json.meta?.pagination;
+      setTotalPages(pagination?.last_page || 1);
+      setTotalData(pagination?.total || 0);
+
+      // 🔥 Filter manual berdasarkan program studi (frontend-side)
+      if (filters.programstudi) {
+        const keyword = filters.programstudi.toLowerCase();
+        data = data.filter((d) => {
+          try {
+            const programs = JSON.parse(d.program_studi || "[]");
+            return programs.some((p) =>
+              p.title.toLowerCase().includes(keyword)
+            );
+          } catch {
+            return false;
+          }
+        });
+      }
 
       const clean = data.map((d) => {
         let programTitles = [];
@@ -92,6 +121,7 @@ const App = () => {
         } catch {
           programTitles = [];
         }
+
         return {
           posisi: d.posisi,
           perusahaan: d.perusahaan?.nama_perusahaan,
@@ -108,6 +138,14 @@ const App = () => {
     } finally {
       setLoading(false);
     }
+  };
+  useEffect(() => {
+    fetchData();
+  }, [filters.page]);
+
+  const handlePageChange = (page) => {
+    if (page < 1 || page > totalPages) return;
+    setFilters((prev) => ({ ...prev, page }));
   };
 
   return (
@@ -162,20 +200,6 @@ const App = () => {
               <option value="DESC">DESC (Besar ke Kecil)</option>
             </select>
           </div>
-
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">
-              Limit Data
-            </label>
-            <input
-              type="number"
-              name="limit"
-              value={filters.limit}
-              onChange={handleChange}
-              className="w-full border rounded-lg p-2 focus:ring-2 focus:ring-blue-400 outline-none"
-            />
-          </div>
-
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">
               Provinsi
@@ -213,6 +237,19 @@ const App = () => {
                 </option>
               ))}
             </select>
+          </div>
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">
+              Program Studi (Beta)
+            </label>
+            <input
+              type="text"
+              name="programstudi"
+              placeholder="Cari Program Studi..."
+              value={filters.programstudi}
+              onChange={handleChange}
+              className="w-full border rounded-lg p-2 focus:ring-2 focus:ring-blue-400 outline-none"
+            />
           </div>
         </div>
 
@@ -329,6 +366,51 @@ const App = () => {
               </div>
             ))}
           </div>
+          {/* Pagination */}
+          <div className="flex justify-center items-center gap-2 mt-8 flex-wrap">
+            <button
+              onClick={() => handlePageChange(filters.page - 1)}
+              disabled={filters.page === 1 || loading}
+              className="px-3 py-1 bg-gray-200 hover:bg-gray-300 rounded disabled:opacity-50"
+            >
+              &lt;
+            </button>
+
+            {/* 🔢 Tombol angka sekitar halaman aktif */}
+            {Array.from({ length: totalPages }, (_, i) => i + 1)
+              .filter(
+                (pageNum) =>
+                  pageNum >= filters.page - 2 && pageNum <= filters.page + 2
+              )
+              .map((pageNum) => (
+                <button
+                  key={pageNum}
+                  onClick={() => handlePageChange(pageNum)}
+                  className={`px-3 py-1 rounded ${
+                    filters.page === pageNum
+                      ? "bg-blue-600 text-white"
+                      : "bg-gray-200 hover:bg-gray-300"
+                  }`}
+                >
+                  {pageNum}
+                </button>
+              ))}
+
+            <button
+              onClick={() => handlePageChange(filters.page + 1)}
+              disabled={filters.page === totalPages || loading}
+              className="px-3 py-1 bg-gray-200 hover:bg-gray-300 rounded disabled:opacity-50"
+            >
+              &gt;
+            </button>
+          </div>
+
+          {/* Info halaman */}
+          <p className="text-center text-gray-500 mt-2">
+            Halaman {filters.page} dari {totalPages} &nbsp;•&nbsp; Total{" "}
+            {totalData} data
+          </p>
+          <BackToTopButton />
         </>
       ) : (
         <p className="text-center text-gray-500">Tidak ada data ditampilkan.</p>

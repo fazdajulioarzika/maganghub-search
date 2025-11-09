@@ -366,75 +366,74 @@ const App = () => {
               </div>
             ))}
           </div>
-          <div className="flex justify-center items-center gap-2 mt-8 flex-wrap">
-            {/* ⏮️ Tombol ke halaman pertama */}
-            <button
-              onClick={() => handlePageChange(1)}
-              disabled={filters.page === 1 || loading}
-              className="px-3 py-1 bg-gray-200 hover:bg-gray-300 rounded disabled:opacity-50"
-            >
-              «
-            </button>
-
-            {/* ⬅️ Tombol halaman sebelumnya */}
-            <button
-              onClick={() => handlePageChange(filters.page - 1)}
-              disabled={filters.page === 1 || loading}
-              className="px-3 py-1 bg-gray-200 hover:bg-gray-300 rounded disabled:opacity-50"
-            >
-              &lt;
-            </button>
-
-            {/* 🔢 Tombol angka sekitar halaman aktif */}
-            {Array.from({ length: totalPages }, (_, i) => i + 1)
-              .filter(
-                (pageNum) =>
-                  pageNum >= filters.page - 2 && pageNum <= filters.page + 2
-              )
-              .map((pageNum) => (
-                <button
-                  key={pageNum}
-                  onClick={() => handlePageChange(pageNum)}
-                  className={`px-2 py-1 rounded ${
-                    filters.page === pageNum
-                      ? "bg-blue-600 text-white"
-                      : "bg-gray-200 hover:bg-gray-300"
-                  }`}
-                >
-                  {pageNum}
-                </button>
-              ))}
-
-            {/* ➡️ Tombol halaman berikutnya */}
-            <button
-              onClick={() => handlePageChange(filters.page + 1)}
-              disabled={filters.page === totalPages || loading}
-              className="px-3 py-1 bg-gray-200 hover:bg-gray-300 rounded disabled:opacity-50"
-            >
-              &gt;
-            </button>
-
-            {/* ⏭️ Tombol ke halaman terakhir */}
-            <button
-              onClick={() => handlePageChange(totalPages)}
-              disabled={filters.page === totalPages || loading}
-              className="px-3 py-1 bg-gray-200 hover:bg-gray-300 rounded disabled:opacity-50"
-            >
-              »
-            </button>
-          </div>
-
-          {/* Info halaman */}
-          <p className="text-center text-gray-500 mt-2">
-            Halaman {filters.page} dari {totalPages} &nbsp;•&nbsp; Total{" "}
-            {totalData} data
-          </p>
-
           <BackToTopButton />
         </>
       ) : (
         <p className="text-center text-gray-500">Tidak ada data ditampilkan.</p>
       )}
+      <div className="flex justify-center items-center gap-2 mt-8 flex-wrap">
+        {/* ⏮️ Tombol ke halaman pertama */}
+        <button
+          onClick={() => handlePageChange(1)}
+          disabled={filters.page === 1 || loading}
+          className="px-3 py-1 bg-gray-200 hover:bg-gray-300 rounded disabled:opacity-50"
+        >
+          «
+        </button>
+
+        {/* ⬅️ Tombol halaman sebelumnya */}
+        <button
+          onClick={() => handlePageChange(filters.page - 1)}
+          disabled={filters.page === 1 || loading}
+          className="px-3 py-1 bg-gray-200 hover:bg-gray-300 rounded disabled:opacity-50"
+        >
+          &lt;
+        </button>
+
+        {/* 🔢 Tombol angka sekitar halaman aktif */}
+        {Array.from({ length: totalPages }, (_, i) => i + 1)
+          .filter(
+            (pageNum) =>
+              pageNum >= filters.page - 2 && pageNum <= filters.page + 2
+          )
+          .map((pageNum) => (
+            <button
+              key={pageNum}
+              onClick={() => handlePageChange(pageNum)}
+              className={`px-2 py-1 rounded ${
+                filters.page === pageNum
+                  ? "bg-blue-600 text-white"
+                  : "bg-gray-200 hover:bg-gray-300"
+              }`}
+            >
+              {pageNum}
+            </button>
+          ))}
+
+        {/* ➡️ Tombol halaman berikutnya */}
+        <button
+          onClick={() => handlePageChange(filters.page + 1)}
+          disabled={filters.page === totalPages || loading}
+          className="px-3 py-1 bg-gray-200 hover:bg-gray-300 rounded disabled:opacity-50"
+        >
+          &gt;
+        </button>
+
+        {/* ⏭️ Tombol ke halaman terakhir */}
+        <button
+          onClick={() => handlePageChange(totalPages)}
+          disabled={filters.page === totalPages || loading}
+          className="px-3 py-1 bg-gray-200 hover:bg-gray-300 rounded disabled:opacity-50"
+        >
+          »
+        </button>
+      </div>
+
+      {/* Info halaman */}
+      <p className="text-center text-gray-500 mt-2">
+        Halaman {filters.page} dari {totalPages} &nbsp;•&nbsp; Total {totalData}{" "}
+        data
+      </p>
     </div>
   );
 };
